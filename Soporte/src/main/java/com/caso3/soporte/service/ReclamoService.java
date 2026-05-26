@@ -1,0 +1,79 @@
+package com.caso3.soporte.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.caso3.soporte.dto.ReclamoDTO;
+import com.caso3.soporte.exception.BusinessException;
+import com.caso3.soporte.exception.ResourceNotFoundException;
+import com.caso3.soporte.model.Reclamo;
+import com.caso3.soporte.model.TicketSoporte;
+import com.caso3.soporte.repository.ReclamoRepository;
+import com.caso3.soporte.repository.TicketSoporteRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+
+public class ReclamoService {
+
+    private final ReclamoRepository reclamoRepository;
+    private final TicketSoporteRepository ticketSoporteRepository;
+
+    public List<Reclamo> listarTodosReclamos() {
+        return reclamoRepository.findAll();
+    }
+
+    public Reclamo obtenerPorIdReclamo(Long idReclamo) {
+        return reclamoRepository.findById(idReclamo)
+            .orElseThrow(() -> new ResourceNotFoundException("Reclamo", idReclamo));
+    }
+
+    public Reclamo registrarReclamo(Long idTicket, ReclamoDTO dto) {
+        log.info("Registrando reclamo para ticket: {}", idTicket);
+
+        TicketSoporte ticket = ticketSoporteRepository.findById(idTicket)
+            .orElseThrow(() -> new ResourceNotFoundException("Ticket", idTicket));
+
+        if (reclamoRepository.findByTicketSoporteIdTicket(idTicket).isPresent()) {
+            throw new BusinessException("El ticket ya tiene un reclamo registrado");
+        }
+
+        Reclamo reclamo = Reclamo.builder()
+            .idPedido(dto.getIdPedido())
+            .idProducto(dto.getIdProducto())
+            .motivo(dto.getMotivo())
+            .descripcion(dto.getDescripcion())
+            .estadoReclamo("EN_REVISION")
+            .fechaReclamo(LocalDateTime.now())
+            .ticketSoporte(ticket)
+            .build();
+
+        return reclamoRepository.save(reclamo);
+    }
+
+    public Reclamo revisarReclamo(Long idReclamo) {
+        log.info("Revisando reclamo {}", idReclamo);
+        Reclamo r = obtenerPorIdReclamo(idReclamo);
+        r.setEstadoReclamo("REVISADO");
+        return reclamoRepository.save(r);
+    }
+
+    public Reclamo actualizarEstado(Long idReclamo, String nuevoEstado) {
+        log.info("Actualizando estado del reclamo {} a {}", idReclamo, nuevoEstado);
+
+        if (!List.of("EN_REVISION", "REVISADO", "RESUELTO", "RECHAZADO").contains(nuevoEstado)) {
+            throw new BusinessException("Estado de reclamo invalido: " + nuevoEstado);
+        }
+
+        Reclamo r = obtenerPorIdReclamo(idReclamo);
+        r.setEstadoReclamo(nuevoEstado);
+        return reclamoRepository.save(r);
+    }
+
+}
