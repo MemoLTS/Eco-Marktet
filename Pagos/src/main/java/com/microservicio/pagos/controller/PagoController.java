@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microservicio.pagos.model.Pago;
@@ -40,11 +41,10 @@ public class PagoController {
     }
 
     @PostMapping("/venta")
-    public Pago registrarVenta(@RequestBody VentaRequest venta, @PathVariable @NonNull Long id) {
-        return service.registrarVenta(venta, id);
-    }
-
-
+    public Pago registrarVenta(@RequestBody VentaRequest venta,
+                           @RequestParam Long usuarioId) {
+        return service.registrarVenta(venta, usuarioId);
+    }   
 
     @PostMapping("/reembolso")
     public Pago procesarReembolso(@RequestBody VentaRequest venta) {

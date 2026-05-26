@@ -1,19 +1,14 @@
 package com.microservicio.pagos.dto;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Entity
-@Table(name = "usuarios")
 public class UsuarioDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long idusuario;
+
     private int rut;
-
-
     private String dv;
-
     private String nombre;
     private String email;
     private String contraseña;
@@ -24,7 +19,11 @@ public class UsuarioDTO {
     public Long getUsuarioId() {
         return idusuario;
     }
-        
+
+    public void setUsuarioId(Long idusuario) {
+        this.idusuario = idusuario;
+    }
+
     public int getRut() {
         return rut;
     }
@@ -64,5 +63,4 @@ public class UsuarioDTO {
     public void setContraseña(String contraseña) {
         this.contraseña = contraseña;
     }
-
 }

@@ -61,10 +61,13 @@ public class PagoService {
     }
 
     public Pago registrarVenta(VentaRequest venta, Long usuarioId) {
+
         UsuarioDTO user = usuarioClient.obtenerUsuario(usuarioId);
+
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
+
         ProductDto producto = productClient.obtenerProducto(venta.getProductId());
 
         if(producto == null){
@@ -84,19 +87,23 @@ public class PagoService {
         pago.setFecha(LocalDate.now());
         pago.setEstado("PAGADO");
 
+        // GUARDAR PRIMERO EL PAGO
+        Pago pagoGuardado = repository.save(pago);
+
         // CREAR TRANSACCION
         Transaccion transaccion = new Transaccion();
 
         transaccion.setFecha(LocalDate.now());
-        transaccion.setIdpago(pago.getId());
+        transaccion.setIdpago(pagoGuardado.getId());
         transaccion.setIdusuario(user.getUsuarioId());
         transaccion.setEstado("APROBADA");
         transaccion.setRespuesta("Venta realizada correctamente");
 
-        // ASIGNAR TRANSACCION AL PAGO
-        pago.setTransaccion(transaccion);
+        // ASIGNAR TRANSACCION
+        pagoGuardado.setTransaccion(transaccion);
 
-        return repository.save(pago);
+        // GUARDAR NUEVAMENTE
+        return repository.save(pagoGuardado);
     }
 
     public Pago procesarPago(@NonNull Pago pago) {

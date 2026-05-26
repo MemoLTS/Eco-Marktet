@@ -6,11 +6,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.microservicio.pagos.dto.UsuarioDTO;
 
 
-@FeignClient(name = "usuario", url = "http://localhost:8081")
+@FeignClient(name = "usuarios", url = "http://localhost:8090")
 public interface UsuarioClient {
 
-    @GetMapping("/api/ecomarket/users/usuarios/{id}")
-    UsuarioDTO obtenerUsuario(@PathVariable("id") Long idusuario);
-
-
+    @GetMapping("/api/ecomarket/usuario/usuarios/{id}")
+    UsuarioDTO obtenerUsuario(@PathVariable Long id);
 }
