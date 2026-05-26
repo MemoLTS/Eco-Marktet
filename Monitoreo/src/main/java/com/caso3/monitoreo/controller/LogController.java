@@ -24,3 +24,4 @@ public class LogController {
         return repository.save(log);
     }
 }
+
